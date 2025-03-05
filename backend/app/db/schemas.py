@@ -1,5 +1,7 @@
 from pydantic import BaseModel, EmailStr, UUID4
-from typing import Optional
+import datetime
+from typing import Optional, List
+
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
@@ -12,46 +14,29 @@ class UserResponse(BaseModel):
     name: Optional[str]
     currency: str
     created_at: datetime.datetime
-
     class Config:
         from_attributes = True
 
 class BankAccountCreate(BaseModel):
-    bank_name: str
-    account_type: Optional[str] = None
-    account_number: Optional[str] = None
-    balance: float = 0.00
-    is_manual: bool = False
-
-class BankAccountResponse(BaseModel):
-    id: UUID4
-    bank_name: str
-    account_type: Optional[str]
-    account_number: Optional[str]
+    institution_name: str
+    account_type: str
     balance: float
-    is_manual: bool
-    last_updated_at: datetime.datetime
 
+class BankAccountResponse(BankAccountCreate):
+    id: UUID4
+    user_id: UUID4
+    created_at: datetime.datetime
     class Config:
         from_attributes = True
 
 class TransactionCreate(BaseModel):
     bank_account_id: UUID4
+    description: str
     amount: float
-    category_id: Optional[UUID4] = None
-    merchant_name: Optional[str] = None
-    transaction_date: datetime.datetime
-    description: Optional[str] = None
+    date: Optional[datetime.datetime] = None
 
-class TransactionResponse(BaseModel):
+class TransactionResponse(TransactionCreate):
     id: UUID4
-    bank_account_id: UUID4
-    amount: float
-    category_id: Optional[UUID4]
-    merchant_name: Optional[str]
-    transaction_date: datetime.datetime
-    description: Optional[str]
-    created_at: datetime.datetime
-
+    user_id: UUID4
     class Config:
         from_attributes = True
