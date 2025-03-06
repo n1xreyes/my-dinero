@@ -2,3 +2,4 @@ SQLAlchemy
 pydantic
 typing
 fastapi
+alembic
