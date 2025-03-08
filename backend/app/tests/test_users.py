@@ -21,6 +21,9 @@ app.dependency_overrides[get_db] = lambda: mock_db()
 
 # Test user registration
 def test_register_user_success(mock_db):
+    # avoid direct calls of the fixture
+    app.dependency_overrides[get_db] = lambda: mock_db
+
     # Mock the database query and commit
     mock_db.query(User).filter().first.return_value = None
     user_data = {
@@ -37,6 +40,7 @@ def test_register_user_success(mock_db):
 
 # Use the fixture properly in the test
 def test_register_user_already_exists(mock_db):
+    # avoid direct calls of the fixture
     app.dependency_overrides[get_db] = lambda: mock_db
 
     # Mock a user already exists in the database
