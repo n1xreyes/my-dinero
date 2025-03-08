@@ -1,6 +1,9 @@
-fastapi
-uvicorn
-sqlalchemy
-pydantic
-alembic
-python-dotenv
+fastapi~=0.115.11
+sqlalchemy~=2.0.38
+pydantic~=2.10.6
+alembic~=1.15.1
+python-dotenv~=1.0.1
+typing~=3.7.4.3
+dotenv~=0.9.9
+pytest~=8.3.5
+email-validator~=2.2.0
