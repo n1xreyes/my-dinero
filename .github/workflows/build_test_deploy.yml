@@ -3,41 +3,125 @@ on:
   push:
     branches:
       - main
+
 jobs:
-  setup-test-backend:
+  deploy-staging:
     runs-on: ubuntu-latest
+    environment: staging   # Uses staging-specific secrets from GitHub
     steps:
       - uses: actions/checkout@v3
 
+      # Backend Steps:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'  # specify your Python version
+          python-version: '3.10'
 
       - name: Install backend dependencies
         working-directory: ./backend
         run: pip install -r requirements.txt
 
-      - name: Run Alembic migrations
+      - name: Run Alembic migrations for backend
         working-directory: ./backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY_STAGING }}
+          ALGORITHM: ${{ secrets.ALGORITHM_STAGING }}
+          ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES_STAGING }}
         run: alembic upgrade head
 
       - name: Run backend tests
         working-directory: ./backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY_STAGING }}
+          ALGORITHM: ${{ secrets.ALGORITHM_STAGING }}
+          ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES_STAGING }}
         run: pytest app/tests/
 
-  setup-test-frontend:
+      - name: Deploy backend to staging
+        working-directory: ./backend
+        run: |
+          echo "Deploying backend to staging..."
+          # staging deployment script here
+
+      # Frontend Steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm install
+
+      - name: Run frontend tests
+        working-directory: ./frontend
+        run: npm test
+
+      - name: Deploy frontend to staging
+        working-directory: ./frontend
+        run: |
+          echo "Deploying frontend to staging..."
+          # staging deployment script here
+
+  deploy-production:
     runs-on: ubuntu-latest
+    environment: production
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Node.js
+      # Backend Steps:
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: pip install -r requirements.txt
+
+      - name: Run Alembic migrations for backend
+        working-directory: ./backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PRODUCTION }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY_PRODUCTION }}
+          ALGORITHM: ${{ secrets.ALGORITHM_PRODUCTION }}
+          ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES_PRODUCTION }}
+        run: alembic upgrade head
+
+      - name: Run backend tests
+        working-directory: ./backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PRODUCTION }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY_PRODUCTION }}
+          ALGORITHM: ${{ secrets.ALGORITHM_PRODUCTION }}
+          ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES_PRODUCTION }}
+        run: pytest app/tests/
+
+      - name: Deploy backend to production
+        working-directory: ./backend
+        run: |
+          echo "Deploying backend to production..."
+          # production deployment script here
+
+      # Frontend Steps:
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'  # or your desired Node.js version
+          node-version: '16'
 
-      - name: Install dependencies and run tests
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm install
+
+      - name: Run frontend tests
+        working-directory: ./frontend
+        run: npm test
+
+      - name: Deploy frontend to production
         working-directory: ./frontend
         run: |
-          npm install
-          npm test
+          echo "Deploying frontend to production..."
+          # production deployment script here

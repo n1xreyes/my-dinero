@@ -5,13 +5,7 @@ import hashlib
 from db.session import SessionLocal
 from db.schemas import UserCreate, UserResponse
 from db.models import User
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+from app.api.dependencies import get_db
 
 router = APIRouter()
 

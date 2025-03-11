@@ -2,6 +2,10 @@ from pydantic import BaseModel, EmailStr, UUID4
 import datetime
 from typing import Optional
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
