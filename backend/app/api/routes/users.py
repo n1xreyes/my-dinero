@@ -1,16 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-import hashlib
-
-from api.dependencies import get_db  # Centralized dependency
+from api.dependencies import get_db
 from db.schemas import UserCreate, UserResponse
 from db.models import User
 
+from passlib.context import CryptContext
+
 router = APIRouter()
 
+# Initialize the CryptContext for bcrypt
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 def hash_password(password: str) -> str:
-    # Use a secure hash function (for production, consider bcrypt via passlib)
-    return hashlib.sha256(password.encode("utf-8")).hexdigest()
+    return pwd_context.hash(password)
 
 @router.post("/register", response_model=UserResponse)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
