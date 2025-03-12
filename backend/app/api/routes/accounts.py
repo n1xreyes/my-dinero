@@ -2,16 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from uuid import UUID
 
-from db.session import SessionLocal
+from api.dependencies import get_db  # Centralized dependency
 from db.schemas import BankAccountCreate, BankAccountResponse
 from db.models import BankAccount, User
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 router = APIRouter()
 
@@ -21,7 +14,7 @@ def create_account(
         user_id: UUID = Query(..., description="ID of the user who owns this account"),
         db: Session = Depends(get_db)
 ):
-    # Ensure the user exists
+    # Verify that the user exists
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
