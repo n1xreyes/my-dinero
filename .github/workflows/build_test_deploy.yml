@@ -24,19 +24,19 @@ jobs:
       - name: Run Alembic migrations for backend
         working-directory: ./backend
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY_STAGING }}
-          ALGORITHM: ${{ secrets.ALGORITHM_STAGING }}
-          ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES_STAGING }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          ALGORITHM: ${{ secrets.ALGORITHM }}
+          ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
         run: alembic upgrade head
 
       - name: Run backend tests
         working-directory: ./backend
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY_STAGING }}
-          ALGORITHM: ${{ secrets.ALGORITHM_STAGING }}
-          ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES_STAGING }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          ALGORITHM: ${{ secrets.ALGORITHM }}
+          ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
         run: pytest app/tests/
 
       - name: Deploy backend to staging
@@ -85,19 +85,19 @@ jobs:
       - name: Run Alembic migrations for backend
         working-directory: ./backend
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PRODUCTION }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY_PRODUCTION }}
-          ALGORITHM: ${{ secrets.ALGORITHM_PRODUCTION }}
-          ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES_PRODUCTION }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          ALGORITHM: ${{ secrets.ALGORITHM }}
+          ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
         run: alembic upgrade head
 
       - name: Run backend tests
         working-directory: ./backend
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PRODUCTION }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY_PRODUCTION }}
-          ALGORITHM: ${{ secrets.ALGORITHM_PRODUCTION }}
-          ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES_PRODUCTION }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          ALGORITHM: ${{ secrets.ALGORITHM }}
+          ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
         run: pytest app/tests/
 
       - name: Deploy backend to production
