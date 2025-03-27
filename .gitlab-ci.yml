@@ -1,0 +1,135 @@
+stages:
+  - test
+  - deploy:staging
+  - deploy:prod
+
+# Define global cache settings for dependencies
+cache:
+  paths:
+    - backend/.venv/                # Cache Python virtual environment
+    - frontend/node_modules/        # Cache Node.js modules
+  key: "$CI_COMMIT_REF_SLUG"        # Cache per branch
+
+# Define default image for jobs if not specified otherwise
+default:
+  image: ubuntu:latest # A base image, specific jobs will override
+
+# Rules to run the pipeline only on pushes to the main branch
+workflow:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+# ---- Backend Jobs ----
+
+.backend_template: &backend_template # YAML anchor for backend job template
+  before_script:
+    - apt-get update && apt-get install -y python3 python3-pip python3-venv # Ensure python tools are available
+    - cd backend
+    - python3 -m venv .venv
+    - source .venv/bin/activate
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+  tags: # Optional: Specify GitLab Runner tags if needed, e.g., [docker, linux]
+    - linux
+
+test:backend:
+  <<: *backend_template # Use the backend template
+  stage: test
+  image: python:3.10   # Use specific Python image for this job
+  script:
+    # Variables like DATABASE_URL, SECRET_KEY etc. must be configured in
+    # GitLab CI/CD settings (Settings -> CI/CD -> Variables).
+    - pytest app/tests/
+  # Rules are inherited from the top-level workflow
+
+deploy:backend:staging:
+  <<: *backend_template
+  stage: deploy:staging
+  image: python:3.10
+  environment:
+    name: staging
+    # Optional: Add a URL for the staging environment
+    # url: https://staging.my-dinero.com
+  script:
+    # Run migrations (assuming DATABASE_URL is set for staging)
+    - alembic upgrade head
+    # Actual deployment script
+    - echo "Deploying backend to staging..."
+    # Example: kubectl apply, docker push/run, etc.
+  # Rules are inherited from the top-level workflow
+
+deploy:backend:production:
+  <<: *backend_template
+  stage: deploy:prod
+  image: python:3.10
+  environment:
+    name: production
+    # Optional: Add a URL for the production environment
+    # url: https://my-dinero.com
+  script:
+    # Run migrations (assuming DATABASE_URL is set for production)
+    - alembic upgrade head
+    # Actual deployment script
+    - echo "Deploying backend to production..."
+    # Use production-specific deployment commands/configs here e.g. kubectl apply
+  when: manual # Make production deployment manual for safety
+  # Rules are inherited from the top-level workflow
+
+# ---- Frontend Jobs ----
+
+.frontend_template: &frontend_template # YAML anchor for frontend job template
+  before_script:
+    - cd frontend
+    - npm install
+  tags: # Optional: Specify GitLab Runner tags if needed
+    - linux
+
+test_frontend:
+  <<: *frontend_template # Use the frontend template
+  stage: test
+  image: node:16        # Use specific Node.js image
+  script:
+    # REACT_APP_API_BASE_URL should be configured in GitLab CI/CD Variables
+    - npm test
+  # Rules are inherited from the top-level workflow
+
+deploy_frontend_staging:
+  <<: *frontend_template
+  stage: deploy:staging
+  image: node:16
+  environment:
+    name: staging
+    # url: https://staging.my-dinero.com # Optional
+  script:
+    # Set env var for staging API (needs to be configured in GitLab CI/CD variables)
+    - export REACT_APP_API_BASE_URL=$STAGING_API_URL
+    - npm run build
+    # Actual deployment script
+    - echo "Deploying frontend to staging..."
+    # Example: Copy build artifacts to a web server/CDN commands here
+  artifacts: # Optional: Save build artifacts if needed for review
+    paths:
+      - frontend/build/
+    expire_in: 1 week
+  # Rules are inherited from the top-level workflow
+
+deploy_frontend_production:
+  <<: *frontend_template
+  stage: deploy:prod
+  image: node:16
+  environment:
+    name: production
+    # url: https://my-dinero.com # Optional
+  script:
+    # Set env var for production API (needs to be configured in GitLab CI/CD variables)
+    - export REACT_APP_API_BASE_URL=$PRODUCTION_API_URL
+    - npm run build
+    # Actual deployment script
+    - echo "Deploying frontend to production..."
+    # Use production-specific deployment commands/configs
+  when: manual # Make production deployment manual for safety
+  artifacts: # Optional: Save build artifacts
+    paths:
+      - frontend/build/
+    expire_in: 1 week # Or keep forever if needed
+  # Rules are inherited from the top-level workflow
