@@ -51,27 +51,13 @@ graph TD
     FastAPI --> TransactionRoutes
     FastAPI --> PlaidRoutes
 
-    %% Service connections
-    PlaidRoutes --> PlaidService
-    PlaidService --> PlaidAPI
-
     %% Database connections
     AuthRoutes --> UserModel
     UserRoutes --> UserModel
     AccountRoutes --> AccountModel
     TransactionRoutes --> TransactionModel
 
-    %% Database interactions
-    UserModel --> DB
-    AccountModel --> DB
-    TransactionModel --> DB
-
-    %% Model relationships
-    UserModel --> AccountModel
-    UserModel --> TransactionModel
-    AccountModel --> TransactionModel
-
-    %% Add labels
+    %% Labeled relationships and interactions
     ReactApp -- "uses" --> FrontendServices
     FrontendServices -- "API calls" --> FastAPI
     PlaidRoutes -- "uses" --> PlaidService
