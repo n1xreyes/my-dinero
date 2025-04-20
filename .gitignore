@@ -1,14 +1,18 @@
 .idea
 .iml
+*.iml
 
 # Python
 __pycache__/
 *.pyc
 .env
+/out
 
 # React
 
 # dependencies
+/frontend/node_modules
+/frontend/build
 /node_modules
 /.pnp
 .pnp.js
